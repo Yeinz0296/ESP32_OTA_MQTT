@@ -2,7 +2,7 @@
 #include <MQTT.h>
 #include <Update.h>
 #include <WiFi.h>
-#include <WiFiClient.h>
+//#include <WiFiClient.h>
 
 #define WIFI_SSID "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
@@ -14,6 +14,7 @@
 #define MQTT_PULSES_TOPIC "/pulses"                      //SUB
 #define MQTT_UPDATE_AVAILABLE_TOPIC "/update/available"  //SUB
 #define MQTT_UPDATE_LINK_TOPIC "/update/link"            //SUB
+#define MQTT_UPDATE_LINK_TOPIC "/status/restart"         //SUB
 #define MQTT_USERNAME "YOUR_MQTT_USERNAME"
 #define MQTT_PASSWORD "YOUR_MQTT_PASSWORD"
 
@@ -48,12 +49,17 @@ void messageReceived(String &topic, String &payload) {
     update_available = true;
   }
 
-  if (topic == "T05/NebulaMQTT/update/available" && payload == "false") {
-    update_available = false;
+  if (topic == "T05/NebulaMQTT/status/restart" && payload == "true") {
+    Serial.println("Restarting");
+    ESP.restart();
   }
 
   if (update_available == true && topic == "T05/NebulaMQTT/update/link") {
     update_link = payload;
+  }
+
+  if (topic == "T05/NebulaMQTT/update/available" && payload == "true") {
+    update_available = true;
   }
 
   if (topic == "T05/NebulaMQTT/pulses") {
@@ -204,9 +210,11 @@ void setup() {
   Serial.println("\nNebulaMQTT");
 
   xTaskCreatePinnedToCore(wireless_setup, "wireless", 10000, NULL, 1, &wirelessTask, 0);
+
+  pinMode(2, OUTPUT);
   
 }
 
 void loop() {
-
+  digitalWrite(2, LOW);
 }
