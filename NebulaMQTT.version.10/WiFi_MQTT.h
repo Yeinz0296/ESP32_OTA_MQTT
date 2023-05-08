@@ -33,9 +33,14 @@ void connectToWiFi() {
 
   Serial.print("Connecting to Wi-Fi '" + String(ssid) + "' ...");
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid.c_str(), password.c_str());
-
+  if (!wifiCredential) {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  } else {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid.c_str(), password.c_str());
+  }
+  
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
